@@ -19,9 +19,7 @@ const DEFAULT_OPTIONS = {
 
 module.exports = {
 
-    get logger() {
-        return logger;
-    },
+    getLogger: () => logger,
 
     createLogger: (options) => {
         logger = bunyan.createLogger(Object.assign(DEFAULT_OPTIONS, options));

@@ -6,8 +6,9 @@ const { SPAN_KEY, setOptions, options } = require('./options');
 
 const loggingHandler = require('express-bunyan-logger');
 
+const { getLogger } = require('./logger');
+
 const loggingOptions = {
-    logger: require('./logger').logger,
     serializers: {
         req: require('bunyan-express-serializer')
     },
@@ -42,7 +43,10 @@ module.exports = {
             if (skip(req)) {
                 next();
             } else {
-                loggingHandler(loggingOptions)(req, res, next);
+                loggingHandler({
+                    logger: getLogger(),
+                    ...loggingOptions
+                })(req, res, next);
             }
         }
     },
@@ -58,7 +62,10 @@ module.exports = {
             res.sentry = eventId;
         });
 
-        loggingHandler.errorLogger(loggingOptions)(err, req, res, next);
+        loggingHandler.errorLogger({
+            logger: getLogger(),
+            ...loggingOptions
+        })(err, req, res, next);
     }
 
 };
