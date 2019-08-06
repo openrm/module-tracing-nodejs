@@ -18,6 +18,8 @@
   "homepage": "https://github.com/openrm/module-tracing-nodejs#readme",
   "dependencies": {
     "@sentry/node": "^5.5.0",
+    "bunyan-express-serializer": "^1.0.0",
+    "express-bunyan-logger": "^1.3.3",
     "express-http-context": "^1.2.3"
   }
 }

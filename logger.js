@@ -1,5 +1,7 @@
 const bunyan = require('bunyan');
 
+let logger;
+
 const DEFAULT_OPTIONS = {
     name: 'default',
     streams: [
@@ -15,5 +17,15 @@ const DEFAULT_OPTIONS = {
     }
 };
 
-module.exports = (options) =>
-    bunyan.createLogger(Object.assign(DEFAULT_OPTIONS, options));
+module.exports = {
+
+    get logger() {
+        return logger;
+    },
+
+    createLogger: (options) => {
+        logger = bunyan.createLogger(Object.assign(DEFAULT_OPTIONS, options));
+        return logger;
+    }
+
+};
