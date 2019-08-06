@@ -26,19 +26,32 @@ const loggingOptions = {
 
 module.exports = {
 
-    requestHandler: (req, res, next) => {
-        const trace = req.header(options.traceHeader) || '';
-        const span = Span.fromTraceparent(trace) || new Span();
+    requestHandler: (opts = {}) => {
+        const skip = (req) => {
+            if (opts.skip) return opts.skip(req);
+            return false;
+        };
 
-        httpContext.set(SPAN_KEY, span);
-        req.span = span;
-        loggingHandler(loggingOptions)(req, res, next);
+        return (req, res, next) => {
+            const trace = req.header(options.traceHeader) || '';
+            const span = Span.fromTraceparent(trace) || new Span();
+
+            httpContext.set(SPAN_KEY, span);
+            req.span = span;
+
+            if (skip(req)) {
+                next();
+            } else {
+                loggingHandler(loggingOptions)(req, res, next);
+            }
+        }
     },
 
     errorHandler: (err, req, res, next) => {
         Sentry.withScope(scope => {
-            if (httpContext.get(SPAN_KEY) || req.span) {
-                scope.setSpan(httpContext.get(SPAN_KEY) || req.span);
+            const span = httpContext.get(SPAN_KEY) || req.span;
+            if (span) {
+                scope.setSpan(span);
             }
 
             const eventId = Sentry.captureException(err, null, scope);
