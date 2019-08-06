@@ -14,7 +14,9 @@ module.exports = {
         require('./intercept');
     },
 
-    ...require('./handlers')
+    ...require('./handlers'),
+
+    createLogger: require('./logger')
 
 };
 
