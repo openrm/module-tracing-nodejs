@@ -20,25 +20,17 @@ const interceptor = (request) => (opts) => {
  * Register interceptor globally
  */
 
-const requestFamily = [
-    'request',
-    'request-promise',
-    'request-promise-native',
-    'request-promise-any'
-];
-
 const Module = require('module');
 
-const load = Module._load;
+const _request = require('request');
+const _load = Module._load;
 
 Module._load = function(path, parent) {
-    if (requestFamily.includes(path) && parent) {
-        const original = load.call(this, path, parent);
-
-        const request = original.defaults(interceptor(original));
-        request.Request = request;
+    if (path === 'request' && parent) {
+        const request = _request.defaults(interceptor(_request));
+        request.Request = _request.Request;
 
         return request;
     }
-    return load.apply(this, arguments);
+    return _load.apply(this, arguments);
 };
