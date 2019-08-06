@@ -1,0 +1,19 @@
+{
+  "name": "tracing",
+  "version": "1.0.0",
+  "description": "Tracing and logging utitlities for internal uses",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openrm/module-tracing-nodejs.git"
+  },
+  "author": "Open Room Inc.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/openrm/module-tracing-nodejs/issues"
+  },
+  "homepage": "https://github.com/openrm/module-tracing-nodejs#readme"
+}
