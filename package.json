@@ -18,6 +18,7 @@
   "homepage": "https://github.com/openrm/module-tracing-nodejs#readme",
   "dependencies": {
     "@sentry/node": "^5.5.0",
+    "bunyan": "^1.8.12",
     "express-http-context": "^1.2.3",
     "request": "^2.88.0"
   }
