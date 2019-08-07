@@ -2,28 +2,8 @@ const httpContext = require('express-http-context');
 const Sentry = require('@sentry/node');
 const { Span } = Sentry;
 
-const { SPAN_KEY, setOptions, options } = require('./options');
-
-const loggingHandler = require('express-bunyan-logger');
-
-const { getLogger } = require('./logger');
-
-const loggingOptions = {
-    serializers: {
-        req: require('bunyan-express-serializer')
-    },
-    includesFn: (req, res) => {
-        const fields = {};
-        const span = httpContext.get(SPAN_KEY) || req.span;
-        if (span) {
-            Object.assign(fields, {
-                spanId: span._spanId,
-                traceId: span._traceId
-            });
-        }
-        return fields;
-    }
-};
+const { SPAN_KEY, LOGGER_KEY, setOptions, options } = require('./options');
+const { loggingHandler, getLogger } = require('./logger');
 
 module.exports = {
 
@@ -43,10 +23,7 @@ module.exports = {
             if (skip(req)) {
                 next();
             } else {
-                loggingHandler({
-                    logger: getLogger(),
-                    ...loggingOptions
-                })(req, res, next);
+                loggingHandler(req, res, next);
             }
         }
     },
@@ -62,10 +39,7 @@ module.exports = {
             res.sentry = eventId;
         });
 
-        loggingHandler.errorLogger({
-            logger: getLogger(),
-            ...loggingOptions
-        })(err, req, res, next);
+        loggingHandler.errorLogger(err, req, res, next);
     }
 
 };

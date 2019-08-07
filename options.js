@@ -1,5 +1,3 @@
-const SPAN_KEY = '__tracing_span';
-
 let OPTIONS = {
     traceHeader: 'Sentry-Trace'
 };
@@ -11,7 +9,9 @@ const setOptions = (opts) => {
 };
 
 module.exports = {
-    SPAN_KEY,
+    SPAN_KEY: '__tracing_span',
+    LOGGER_KEY: '__tracing_logger',
+
     setOptions,
     get options() {
         return OPTIONS;
