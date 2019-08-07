@@ -1,10 +1,12 @@
 const bunyan = require('bunyan');
+const morgan = require('morgan');
 const httpContext = require('express-http-context');
 const util = require('util');
 
-const { LOGGER_KEY } = require('./options');
+const { LOGGER_KEY, options } = require('./options');
 
 let logger;
+let formatter;
 
 const DEFAULT_OPTIONS = {
     name: 'default',
@@ -23,6 +25,12 @@ const level = (res, err) => {
     const code = res.statusCode;
     return err || code >= 500 ? 'error' : code > 400 ? 'warn' : 'info';
 };
+
+const getFormatter = () => {
+    if (formatter) return formatter;
+    formatter = morgan.compile(options.logFormat);
+    return formatter;
+}
 
 const baseLoggingHandler = (err, req, res, next) => {
 
@@ -69,8 +77,10 @@ const baseLoggingHandler = (err, req, res, next) => {
             err
         };
 
+        const formatter = getFormatter();
+
         const levelLogger = localLogger[level(res, err)];
-        levelLogger.call(localLogger, fields);
+        levelLogger.call(localLogger, fields, formatter(morgan, req, res));
 
         res.removeListener('finish', listener);
         res.removeListener('close', listener);

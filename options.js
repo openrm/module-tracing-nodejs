@@ -1,5 +1,8 @@
+const COMBINED_APACHE_FORMAT = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
+
 let OPTIONS = {
-    traceHeader: 'Sentry-Trace'
+    traceHeader: 'Sentry-Trace',
+    logFormat: COMBINED_APACHE_FORMAT
 };
 
 const setOptions = (opts) => {
