@@ -71,37 +71,38 @@ const baseLoggingHandler = (err, req, res, next) => {
     httpContext.set(LOGGER_KEY, localLogger);
     req.logger = localLogger;
 
+    const log = {
+        ip: req.ip || '127.0.0.1',
+        remoteAdress: req.connection.remoteAddress,
+        remotePort: req.connection.remotePort,
+        protocol: `${req.protocol}/${req.httpVersion}`,
+        method: req.method,
+        url: req.originalUrl || req.url,
+        cookies: req.cookies,
+        query: req.query,
+        params: req.params,
+        user: req.user,
+        span: req.span,
+        fields: req.fields,
+        files: inspect(req.files),
+        referer: req.header('Referrer') || req.header('Referer'),
+        userAgent: req.header('User-Agent'),
+        body: inspect(JSON.parse(JSON.stringify(req.body)), options.bodyInspectOptions),
+        headers: req.headers,
+    };
+
     const listener = () => {
 
         const [s, ns] = process.hrtime(start);
         const responseTime = (s * 1e9 + ns) / 1e6; // ms
 
-        const protocol = `${req.protocol}/${req.httpVersion}`;
-
-        const log = {
+        Object.assign(log, {
             status: res.statusCode,
-            ip: req.ip || '127.0.0.1',
-            remoteAdress: req.connection.remoteAddress,
-            remotePort: req.connection.remotePort,
-            protocol,
-            method: req.method,
-            url: req.originalUrl || req.url,
-            cookies: req.cookies,
-            query: req.query,
-            params: req.params,
-            user: req.user,
-            span: req.span,
-            fields: req.fields,
-            files: inspect(req.files),
-            referer: req.header('Referrer') || req.header('Referer'),
-            userAgent: req.header('User-Agent'),
-            contentLength: res.getHeader('Content-Length'),
-            body: inspect(req.body, options.bodyInspectOptions),
-            headers: req.headers,
             responseTime,
             responseHeaders: res._headers,
+            contentLength: res.getHeader('Content-Length'),
             err
-        };
+        });
 
         options.beforeOutput(log);
 
