@@ -2,7 +2,12 @@ const COMBINED_APACHE_FORMAT = ':remote-addr - :remote-user [:date[clf]] ":metho
 
 let OPTIONS = {
     traceHeader: 'Sentry-Trace',
-    logFormat: COMBINED_APACHE_FORMAT
+    logFormat: COMBINED_APACHE_FORMAT,
+    bodyInspectOptions: {
+        depth: Infinity,
+        maxLengthArray: Infinity,
+        maxLengthString: 1000
+    }
 };
 
 const setOptions = (opts) => {

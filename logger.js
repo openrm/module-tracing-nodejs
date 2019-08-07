@@ -21,6 +21,28 @@ const DEFAULT_OPTIONS = {
     }
 };
 
+const truncate = (object, opts = { maxLengthString: 1000 }) => {
+
+    if (typeof object === 'string') {
+        if (object.length > opts.maxLengthString) {
+            return object.substring(0, 50) + ` ... ${object.length - 50} more characters`;
+        }
+    }
+
+    if (typeof object === 'object') {
+        Object.keys(object).forEach(key => {
+            object[key] = truncate(object[key]);
+        });
+
+        return object;
+    }
+
+    return object;
+
+};
+
+const inspectBody = (body, opts) => util.inspect(truncate(body, opts), opts);
+
 const level = (res, err) => {
     const code = res.statusCode;
     return err || code >= 500 ? 'error' : code > 400 ? 'warn' : 'info';
@@ -70,7 +92,7 @@ const baseLoggingHandler = (err, req, res, next) => {
             referer: req.header('Referrer') || req.header('Referer') || '-',
             userAgent: req.header('User-Agent'),
             contentLength: res.getHeader('Content-Length'),
-            body: util.inspect(req.body, { depth: 0 }),
+            body: inspectBody(req.body, options.bodyInspectOptions),
             headers: req.headers,
             responseTime,
             responseHeader: res._headers,
@@ -96,6 +118,8 @@ const baseLoggingHandler = (err, req, res, next) => {
 
 
 module.exports = {
+
+    truncate,
 
     getLogger: () => logger,
     getContextLogger: () => httpContext.get(LOGGER_KEY) || logger,
