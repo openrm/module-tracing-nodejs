@@ -78,7 +78,7 @@ const baseLoggingHandler = (err, req, res, next) => {
 
         const protocol = `${req.protocol}/${req.httpVersion}`;
 
-        const fields = {
+        const log = {
             status: res.statusCode,
             ip: req.ip || '127.0.0.1',
             remoteAdress: req.connection.remoteAddress,
@@ -99,14 +99,16 @@ const baseLoggingHandler = (err, req, res, next) => {
             body: inspect(req.body, options.bodyInspectOptions),
             headers: req.headers,
             responseTime,
-            responseHeader: res._headers,
+            responseHeaders: res._headers,
             err
         };
+
+        options.beforeOutput(log);
 
         const formatter = getFormatter();
 
         const levelLogger = localLogger[level(res, err)];
-        levelLogger.call(localLogger, fields, formatter(morgan, req, res));
+        levelLogger.call(localLogger, log, formatter(morgan, req, res));
 
         res.removeListener('finish', listener);
         res.removeListener('close', listener);
