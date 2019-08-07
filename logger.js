@@ -41,7 +41,7 @@ const truncate = (object, opts = { maxLengthString: 1000 }) => {
 
 };
 
-const inspect = (data, opts) => data & util.inspect(truncate(data, opts), opts);
+const inspect = (data, opts) => data && util.inspect(truncate(data, opts), opts);
 
 const level = (res, err) => {
     const code = res.statusCode;
