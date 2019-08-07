@@ -41,7 +41,7 @@ const truncate = (object, opts = { maxLengthString: 1000 }) => {
 
 };
 
-const inspectBody = (body, opts) => util.inspect(truncate(body, opts), opts);
+const inspect = (data, opts) => util.inspect(truncate(data, opts), opts);
 
 const level = (res, err) => {
     const code = res.statusCode;
@@ -89,10 +89,14 @@ const baseLoggingHandler = (err, req, res, next) => {
             cookies: req.cookies,
             query: req.query,
             params: req.params,
+            user: req.user,
+            span: req.span,
+            fields: req.fields,
+            files: inspect(req.files),
             referer: req.header('Referrer') || req.header('Referer') || '-',
             userAgent: req.header('User-Agent'),
             contentLength: res.getHeader('Content-Length'),
-            body: inspectBody(req.body, options.bodyInspectOptions),
+            body: inspect(req.body, options.bodyInspectOptions),
             headers: req.headers,
             responseTime,
             responseHeader: res._headers,
