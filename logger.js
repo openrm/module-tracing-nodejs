@@ -63,6 +63,7 @@ const baseLoggingHandler = (err, req, res, next) => {
     if (req.span) {
         const span = req.span;
         localLogger = logger.child({
+            span,
             spanId: span._spanId,
             traceId: span._traceId
         });
