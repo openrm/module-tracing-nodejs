@@ -82,7 +82,7 @@ const baseLoggingHandler = (err, req, res, next) => {
         span: req.span,
         referer: req.header('Referrer') || req.header('Referer'),
         userAgent: req.header('User-Agent'),
-        body: inspect(JSON.parse(JSON.stringify(req.body)), options.bodyInspectOptions),
+        body: inspect(req.body, options.bodyInspectOptions),
         headers: req.headers,
     };
 
