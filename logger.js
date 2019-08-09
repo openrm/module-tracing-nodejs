@@ -123,17 +123,38 @@ const baseLoggingHandler = (err, req, res, next) => {
 
 };
 
+const getContextLogger = () => httpContext.get(LOGGER_KEY) || logger;
+
+function makeContextLogger(level = bunyan.INFO) {
+  return function(...args) {
+    const logger = getContextLogger() || bunyan.createLogger(DEFAULT_OPTIONS);
+    const emitter = logger[bunyan.nameFromLevel[level]];
+    emitter.call(logger, ...args);
+  };
+}
+
+function wrapLogger(logger) {
+    return {
+        trace: makeContextLogger(bunyan.TRACE),
+        debug: makeContextLogger(bunyan.DEBUG),
+        info: makeContextLogger(bunyan.INFO),
+        warn: makeContextLogger(bunyan.WARN),
+        error: makeContextLogger(bunyan.ERROR),
+        fatal: makeContextLogger(bunyan.FATAL)
+    };
+}
+
 
 module.exports = {
 
     truncate,
 
     getLogger: () => logger,
-    getContextLogger: () => httpContext.get(LOGGER_KEY) || logger,
+    getContextLogger,
 
     createLogger: (options) => {
         logger = bunyan.createLogger(Object.assign(DEFAULT_OPTIONS, options));
-        return logger;
+        return wrapLogger(logger);
     },
 
     loggingHandler: (req, res, next) => baseLoggingHandler(undefined, req, res, next),
