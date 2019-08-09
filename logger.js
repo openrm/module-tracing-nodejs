@@ -99,7 +99,7 @@ const baseLoggingHandler = (err, req, res, next) => {
             files: inspect(req.files),
             status: res.statusCode,
             responseTime,
-            responseHeaders: res._headers,
+            responseHeaders: res.getHeaders(),
             responseContentLength: res.getHeader('Content-Length'),
             err
         });
