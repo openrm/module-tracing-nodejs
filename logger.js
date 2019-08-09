@@ -78,13 +78,8 @@ const baseLoggingHandler = (err, req, res, next) => {
         protocol: `${req.protocol}/${req.httpVersion}`,
         method: req.method,
         url: req.originalUrl || req.url,
-        cookies: req.cookies,
         query: req.query,
-        params: req.params,
-        user: req.user,
         span: req.span,
-        fields: req.fields,
-        files: inspect(req.files),
         referer: req.header('Referrer') || req.header('Referer'),
         userAgent: req.header('User-Agent'),
         body: inspect(JSON.parse(JSON.stringify(req.body)), options.bodyInspectOptions),
@@ -97,10 +92,15 @@ const baseLoggingHandler = (err, req, res, next) => {
         const responseTime = (s * 1e9 + ns) / 1e6; // ms
 
         Object.assign(log, {
+            params: req.params,
+            user: req.user,
+            cookies: req.cookies,
+            fields: req.fields,
+            files: inspect(req.files),
             status: res.statusCode,
             responseTime,
             responseHeaders: res._headers,
-            contentLength: res.getHeader('Content-Length'),
+            responseContentLength: res.getHeader('Content-Length'),
             err
         });
 
