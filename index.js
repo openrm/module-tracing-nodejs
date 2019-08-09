@@ -7,7 +7,7 @@ module.exports = {
 
     SPAN_KEY,
 
-    init: (opts) => {
+    init: (opts = {}) => {
         assert(Sentry.getCurrentHub().getStackTop().client, 'Sentry client is not initialized');
 
         setOptions(opts);
