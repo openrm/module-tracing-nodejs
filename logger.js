@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const httpContext = require('express-http-context');
 const util = require('util');
 
-const { LOGGER_KEY, options } = require('./options');
+const { LOGGER_KEY, options, mask } = require('./options');
 
 let logger;
 let formatter;
@@ -105,7 +105,13 @@ const baseLoggingHandler = (err, req, res, next) => {
             err
         });
 
-        options.beforeOutput(log);
+        const utils = { mask };
+
+        try {
+            options.beforeOutput(log, utils);
+        } catch (e) {
+            return localLogger.error(e);
+        }
 
         const formatter = getFormatter();
 

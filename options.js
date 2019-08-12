@@ -1,9 +1,11 @@
 const COMBINED_APACHE_FORMAT = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
 
 const MASK = '[Filtered]';
+const mask = (field) => field && (field = MASK);
+
 const MASK_CREDENTIALS = (log) => {
-    log.headers['authorization'] = MASK;
-    log.fields && log.fields['password'] && (log.fields['password'] = MASK);
+    mask(log.headers['authorization']);
+    log.fields && mask(log.fields['password']);
 };
 
 let OPTIONS = {
