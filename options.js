@@ -29,6 +29,8 @@ module.exports = {
     SPAN_KEY: '__tracing_span',
     LOGGER_KEY: '__tracing_logger',
 
+    mask,
+
     setOptions,
     get options() {
         return OPTIONS;
