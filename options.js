@@ -1,7 +1,7 @@
 const COMBINED_APACHE_FORMAT = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
 
 const MASK = '[Filtered]';
-const mask = (object, field) => object && field && (object[field] = MASK);
+const mask = (object, field) => object && object[field] && (object[field] = MASK);
 
 const MASK_CREDENTIALS = (log) => {
     mask(log.headers, 'authorization');
