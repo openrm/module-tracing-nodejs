@@ -36,7 +36,7 @@ module.exports = {
             }
 
             const eventId = Sentry.captureException(err, null, scope);
-            res.sentry = eventId;
+            res.sentry = { eventId };
         });
 
         loggingHandler.errorLogger(err, req, res, next);

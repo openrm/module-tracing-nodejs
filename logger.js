@@ -102,6 +102,7 @@ const baseLoggingHandler = (err, req, res, next) => {
             responseTime,
             responseHeaders: res.getHeaders(),
             responseContentLength: res.getHeader('Content-Length'),
+            sentry: res.sentry,
             err
         });
 
