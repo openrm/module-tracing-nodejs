@@ -53,6 +53,12 @@ const getFormatter = () => {
     return formatter;
 }
 
+const stringifySpan = (span) => ({
+    parent: span._parent && stringifySpan(span._parent),
+    spanId: span._spanId,
+    traceId: span._traceId
+})
+
 const baseLoggingHandler = (err, req, res, next) => {
 
     const start = process.hrtime();
@@ -62,7 +68,7 @@ const baseLoggingHandler = (err, req, res, next) => {
     if (req.span) {
         const span = req.span;
         localLogger = logger.child({
-            span,
+            span: stringifySpan(span),
             spanId: span._spanId,
             traceId: span._traceId
         });
