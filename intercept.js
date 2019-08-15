@@ -1,9 +1,7 @@
-const httpContext = require('express-http-context');
-
 const { SPAN_KEY, options } = require('./options');
 
 const interceptor = (request) => (opts) => {
-    const span = httpContext.get(SPAN_KEY);
+    const span = options.httpContext.get(SPAN_KEY);
 
     if (!span) return request(opts);
 

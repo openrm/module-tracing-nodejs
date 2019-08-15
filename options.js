@@ -1,3 +1,4 @@
+const httpContext = require('express-http-context');
 const COMBINED_APACHE_FORMAT = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
 
 const MASK = '[Filtered]';
@@ -16,7 +17,8 @@ let OPTIONS = {
         maxLengthArray: Infinity,
         maxLengthString: 1000
     },
-    beforeOutput: MASK_CREDENTIALS
+    beforeOutput: MASK_CREDENTIALS,
+    httpContext
 };
 
 const setOptions = (opts) => {

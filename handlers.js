@@ -1,4 +1,3 @@
-const httpContext = require('express-http-context');
 const Sentry = require('@sentry/node');
 const { Span } = Sentry;
 
@@ -17,7 +16,7 @@ module.exports = {
             const trace = req.header(options.traceHeader) || '';
             const span = Span.fromTraceparent(trace) || new Span();
 
-            httpContext.set(SPAN_KEY, span);
+            options.httpContext.set(SPAN_KEY, span);
             req.span = span;
 
             if (skip(req)) {
@@ -30,7 +29,7 @@ module.exports = {
 
     errorHandler: (err, req, res, next) => {
         Sentry.withScope(scope => {
-            const span = httpContext.get(SPAN_KEY) || req.span;
+            const span = options.httpContext.get(SPAN_KEY) || req.span;
             if (span) {
                 scope.setSpan(span);
             }

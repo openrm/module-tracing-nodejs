@@ -1,6 +1,5 @@
 const bunyan = require('bunyan');
 const morgan = require('morgan');
-const httpContext = require('express-http-context');
 const util = require('util');
 
 const { LOGGER_KEY, options, mask } = require('./options');
@@ -69,7 +68,7 @@ const baseLoggingHandler = (err, req, res, next) => {
         });
     }
 
-    httpContext.set(LOGGER_KEY, localLogger);
+    options.httpContext.set(LOGGER_KEY, localLogger);
     req.logger = localLogger;
 
     const log = {
@@ -131,25 +130,16 @@ const baseLoggingHandler = (err, req, res, next) => {
 
 };
 
-const getContextLogger = () => httpContext.get(LOGGER_KEY) || logger;
+const getContextLogger = () => options.httpContext.get(LOGGER_KEY) || logger;
 
-function makeContextLogger(level = bunyan.INFO) {
-  return function(...args) {
-    const logger = getContextLogger() || bunyan.createLogger(DEFAULT_OPTIONS);
-    const emitter = logger[bunyan.nameFromLevel[level]];
-    emitter.call(logger, ...args);
-  };
-}
-
-function wrapLogger(logger) {
-    return {
-        trace: makeContextLogger(bunyan.TRACE),
-        debug: makeContextLogger(bunyan.DEBUG),
-        info: makeContextLogger(bunyan.INFO),
-        warn: makeContextLogger(bunyan.WARN),
-        error: makeContextLogger(bunyan.ERROR),
-        fatal: makeContextLogger(bunyan.FATAL)
+const wrapLogger = (logger) => {
+    const _emit = logger._emit;
+    logger._emit = function() {
+        const contextLogger = getContextLogger();
+        Object.assign(arguments[0], contextLogger ? contextLogger.fields : {});
+        return _emit.apply(this, arguments);
     };
+    return logger;
 }
 
 
