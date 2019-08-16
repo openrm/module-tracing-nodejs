@@ -4,9 +4,6 @@ const util = require('util');
 
 const { LOGGER_KEY, options, mask } = require('./options');
 
-let logger;
-let formatter;
-
 const DEFAULT_OPTIONS = {
     name: 'default',
     streams: [
@@ -18,6 +15,14 @@ const DEFAULT_OPTIONS = {
     serializers: {
         err: bunyan.stdSerializers.err
     }
+};
+
+let defaultLogger, formatter;
+
+const getFormatter = () => {
+    if (formatter) return formatter;
+    formatter = morgan.compile(options.logFormat);
+    return formatter;
 };
 
 const truncate = (object, opts = { maxLengthString: 1000 }) => {
@@ -42,28 +47,17 @@ const truncate = (object, opts = { maxLengthString: 1000 }) => {
 
 const inspect = (data, opts) => data && util.inspect(truncate(data, opts), opts);
 
-const level = (res, err) => {
-    const code = res.statusCode;
-    return err || code >= 500 ? 'error' : code > 400 ? 'warn' : 'info';
-};
-
-const getFormatter = () => {
-    if (formatter) return formatter;
-    formatter = morgan.compile(options.logFormat);
-    return formatter;
-}
-
 const stringifySpan = (span) => ({
     parent: span._parent && stringifySpan(span._parent),
     spanId: span._spanId,
     traceId: span._traceId
-})
+});
 
 const baseLoggingHandler = (err, req, res, next) => {
 
     const start = process.hrtime();
 
-    let localLogger = logger;
+    let localLogger = defaultLogger;
 
     if (req.span) {
         const span = req.span;
@@ -120,10 +114,8 @@ const baseLoggingHandler = (err, req, res, next) => {
             return localLogger.error(e);
         }
 
-        const formatter = getFormatter();
-
         const levelLogger = localLogger[level(res, err)];
-        levelLogger.call(localLogger, log, formatter(morgan, req, res));
+        levelLogger.call(localLogger, log, getFormatter()(morgan, req, res));
 
         res.removeListener('finish', listener);
         res.removeListener('close', listener);
@@ -137,7 +129,12 @@ const baseLoggingHandler = (err, req, res, next) => {
 
 };
 
-const getContextLogger = () => options.httpContext.get(LOGGER_KEY) || logger;
+const level = (res, err) => {
+    const code = res.statusCode;
+    return err || code >= 500 ? 'error' : code > 400 ? 'warn' : 'info';
+};
+
+const getContextLogger = () => options.httpContext.get(LOGGER_KEY) || defaultLogger;
 
 const wrapLogger = (logger) => {
     const _emit = logger._emit;
@@ -147,19 +144,18 @@ const wrapLogger = (logger) => {
         return _emit.apply(this, arguments);
     };
     return logger;
-}
+};
 
 
 module.exports = {
 
     truncate,
 
-    getLogger: () => logger,
-    getContextLogger,
+    getLogger: getContextLogger,
 
     createLogger: (options) => {
-        logger = bunyan.createLogger(Object.assign(DEFAULT_OPTIONS, options));
-        return wrapLogger(logger);
+        defaultLogger = bunyan.createLogger(Object.assign(DEFAULT_OPTIONS, options));
+        return wrapLogger(defaultLogger);
     },
 
     loggingHandler: (req, res, next) => baseLoggingHandler(undefined, req, res, next),
