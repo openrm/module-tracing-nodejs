@@ -33,7 +33,7 @@ const truncate = (object, opts = { maxLengthString: 1000 }) => {
         }
     }
 
-    if (typeof object === 'object') {
+    if (object && typeof object === 'object') {
         Object.keys(object).forEach(key => {
             object[key] = truncate(object[key], opts);
         });
