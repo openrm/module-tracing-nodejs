@@ -92,7 +92,7 @@ const baseLoggingHandler = (err, req, res, next) => {
         const responseTime = (s * 1e9 + ns) / 1e6; // ms
 
         Object.assign(log, {
-            locals: res.locals,
+            locals: truncate(res.locals),
             params: req.params,
             user: req.user,
             cookies: req.cookies,
