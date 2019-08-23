@@ -55,6 +55,10 @@ const stringifySpan = (span) => ({
 
 const baseLoggingHandler = (err, req, res, next) => {
 
+    if (err) {
+        req._thrown = true;
+    }
+
     const start = process.hrtime();
 
     let localLogger = defaultLogger;
@@ -88,6 +92,12 @@ const baseLoggingHandler = (err, req, res, next) => {
 
     const listener = () => {
 
+        res.removeListener('finish', listener);
+        res.removeListener('close', listener);
+
+        // When failed, skip regular logging
+        if (!err && req._thrown) return;
+
         const [s, ns] = process.hrtime(start);
         const responseTime = (s * 1e9 + ns) / 1e6; // ms
 
@@ -116,9 +126,6 @@ const baseLoggingHandler = (err, req, res, next) => {
 
         const levelLogger = localLogger[level(res, err)];
         levelLogger.call(localLogger, log, getFormatter()(morgan, req, res));
-
-        res.removeListener('finish', listener);
-        res.removeListener('close', listener);
 
     };
 
