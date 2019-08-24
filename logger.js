@@ -13,6 +13,7 @@ const DEFAULT_OPTIONS = {
         }
     ],
     serializers: {
+        errTimeout: bunyan.stdSerializers.err,
         err: bunyan.stdSerializers.err
     }
 };
@@ -90,13 +91,19 @@ const baseLoggingHandler = (err, req, res, next) => {
         headers: req.headers,
     };
 
+    let logged = false, timedout;
+
     const listener = () => {
 
-        res.removeListener('finish', listener);
-        res.removeListener('close', listener);
-
         // When failed, skip regular logging
-        if (!err && req._thrown) return;
+        if (logged || req._thrown && !err) return;
+
+        if (!timedout) {
+            logged = true;
+
+            res.removeListener('finish', listener);
+            res.removeListener('close', listener);
+        }
 
         const [s, ns] = process.hrtime(start);
         const responseTime = (s * 1e9 + ns) / 1e6; // ms
@@ -113,6 +120,7 @@ const baseLoggingHandler = (err, req, res, next) => {
             responseHeaders: res.getHeaders(),
             responseContentLength: res.getHeader('Content-Length'),
             sentry: res.sentry,
+            errTimeout: timedout,
             err
         });
 
@@ -124,7 +132,7 @@ const baseLoggingHandler = (err, req, res, next) => {
             return localLogger.error(e);
         }
 
-        const levelLogger = localLogger[level(res, err)];
+        const levelLogger = localLogger[level(res, err, timedout)];
         levelLogger.call(localLogger, log, getFormatter()(morgan, req, res));
 
     };
@@ -132,13 +140,20 @@ const baseLoggingHandler = (err, req, res, next) => {
     res.on('finish', listener);
     res.on('close', listener);
 
+    const timeoutListener = () => {
+        timedout = new Error(`Response time exceeded the limit: ${options.timeout} ms`);
+        listener();
+    };
+
+    setTimeout(timeoutListener, options.timeout);
+
     next(err);
 
 };
 
-const level = (res, err) => {
+const level = (res, err, timedout) => {
     const code = res.statusCode;
-    return err || code >= 500 ? 'error' : code > 400 ? 'warn' : 'info';
+    return err || timedout || code >= 500 ? 'error' : code > 400 ? 'warn' : 'info';
 };
 
 const getContextLogger = () => options.httpContext.get(LOGGER_KEY) || defaultLogger;

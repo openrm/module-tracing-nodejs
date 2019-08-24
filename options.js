@@ -18,7 +18,8 @@ let OPTIONS = {
         maxLengthString: 1000
     },
     beforeOutput: MASK_CREDENTIALS,
-    httpContext
+    httpContext,
+    timeout: 5000
 };
 
 const setOptions = (opts) => {
