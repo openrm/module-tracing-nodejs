@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/openrm/module-tracing-nodejs#readme",
   "dependencies": {
+    "@google-cloud/trace-agent": "^4.2.0",
+    "@opencensus/propagation-stackdriver": "0.0.17",
     "@sentry/node": "^5.5.0",
     "bunyan": "^1.8.12",
     "express-http-context": "^1.2.3",

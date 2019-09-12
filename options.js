@@ -19,7 +19,8 @@ let OPTIONS = {
     },
     beforeOutput: MASK_CREDENTIALS,
     httpContext,
-    timeout: 5000
+    timeout: 5000,
+    samplingRate: 100
 };
 
 const setOptions = (opts) => {

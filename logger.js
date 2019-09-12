@@ -1,8 +1,10 @@
 const bunyan = require('bunyan');
 const morgan = require('morgan');
 const util = require('util');
+const tracer = require('@google-cloud/trace-agent').get();
 
 const { LOGGER_KEY, options, mask } = require('./options');
+const propagation = require('./propagation');
 
 const DEFAULT_OPTIONS = {
     name: 'default',
@@ -64,14 +66,12 @@ const baseLoggingHandler = (err, req, res, next) => {
 
     let localLogger = defaultLogger;
 
-    if (req.span) {
-        const span = req.span;
-        localLogger = logger.child({
-            span: stringifySpan(span),
-            spanId: span._spanId,
-            traceId: span._traceId
-        });
-    }
+    localLogger = logger.child({
+        span: {
+            ...tracer.getCurrentRootSpan().getTraceContext(),
+            parent: propagation.extract({ getHeader: req.header.bind(req) })
+        }
+    });
 
     options.httpContext.set(LOGGER_KEY, localLogger);
     req.logger = localLogger;
@@ -84,7 +84,6 @@ const baseLoggingHandler = (err, req, res, next) => {
         method: req.method,
         url: req.originalUrl || req.url,
         query: req.query,
-        span: req.span,
         referer: req.header('Referrer') || req.header('Referer'),
         userAgent: req.header('User-Agent'),
         body: inspect(req.body && JSON.parse(JSON.stringify(req.body)), options.bodyInspectOptions),

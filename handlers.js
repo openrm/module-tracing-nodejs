@@ -16,12 +16,6 @@ module.exports = {
         };
 
         return (req, res, next) => {
-            const trace = req.header(options.traceHeader) || '';
-            const span = Span.fromTraceparent(trace) || new Span();
-
-            options.httpContext.set(SPAN_KEY, span);
-            req.span = span;
-
             if (skip(req)) {
                 next();
             } else {
@@ -45,19 +39,12 @@ module.exports = {
             if (err instanceof StatusCodeError) {
                 const {
                     error,
-                    statusCode,
-                    options
+                    statusCode
                 } = err;
 
-                res.status(500).send({
-                    message: `request ${options.method} ${options.uri} failed with status ${statusCode}`,
-                    cause: {
-                        status: statusCode,
-                        error
-                    }
-                });
+                res.status(statusCode < 500 ? statusCode : 500).send(error);
             } else {
-                res.status(500).send({
+                res.status(err.statusCode || err.code || 500).send({
                     message: typeof err === 'string' ? err : err.message
                 });
             }

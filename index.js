@@ -12,6 +12,7 @@ module.exports = {
 
         setOptions(opts);
         require('./intercept');
+        require('./tracer');
     },
 
     ...require('./handlers'),
