@@ -47,7 +47,12 @@ module.exports = {
 
                 res.status(statusCode < 500 ? statusCode : 500).send(error);
             } else {
-                res.status(err.statusCode || err.code || 500).send({
+                const code = parseInt(err.statusCode)
+                    || parseInt(err.status)
+                    || parseInt(err.code)
+                    || 500;
+
+                res.status(code).send({
                     message: typeof err === 'string' ? err : err.message || err.name
                 });
             }
