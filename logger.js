@@ -1,7 +1,7 @@
 const bunyan = require('bunyan');
 const morgan = require('morgan');
 const util = require('util');
-const tracer = require('@google-cloud/trace-agent').get();
+const traceAgent = require('@google-cloud/trace-agent');
 
 const { LOGGER_KEY, options, mask } = require('./options');
 const propagation = require('./propagation');
@@ -66,6 +66,7 @@ const baseLoggingHandler = (err, req, res, next) => {
 
     let localLogger = defaultLogger;
 
+    const tracer = traceAgent.get();
     localLogger = logger.child({
         span: {
             ...tracer.getCurrentRootSpan().getTraceContext(),

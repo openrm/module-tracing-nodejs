@@ -13,8 +13,8 @@ const parse = (trace) => {
         }
     }
     return {
-        traceId: matches[1],
-        spanId: matches[2],
+        traceId: matches[1] || '',
+        spanId: matches[2] || '',
         options: isNaN(Number(matches[3])) ? undefined : Number(matches[3])
     };
 };
@@ -30,7 +30,7 @@ const serialize = (spanContext) => {
 
 module.exports = {
     extract (getter) {
-        return parse(getter.getHeader(options.traceHeader));
+        return parse(getter.getHeader(options.traceHeader) || '');
     },
     inject (setter, spanContext) {
         setter.setHeader(options.traceHeader, serialize(spanContext));

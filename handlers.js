@@ -1,6 +1,7 @@
 const Sentry = require('@sentry/node');
 const { Span } = Sentry;
 const { StatusCodeError } = require('request-promise-core/errors');
+const traceAgent = require('@google-cloud/trace-agent');
 
 const { SPAN_KEY, LOGGER_KEY, setOptions, options } = require('./options');
 const { loggingHandler, getLogger } = require('./logger');
@@ -26,9 +27,11 @@ module.exports = {
 
     errorHandler: (opts = {}) => (err, req, res, next) => {
         Sentry.withScope(scope => {
-            const span = options.httpContext.get(SPAN_KEY) || req.span;
+            const tracer = traceAgent.get();
+            const span = tracer.getCurrentRootSpan().getTraceContext();
+
             if (span) {
-                scope.setSpan(span);
+                scope.setSpan(new Span(span.traceId, span.spanId, span.options === 1));
             }
 
             const eventId = Sentry.captureException(err, null, scope);
@@ -45,7 +48,7 @@ module.exports = {
                 res.status(statusCode < 500 ? statusCode : 500).send(error);
             } else {
                 res.status(err.statusCode || err.code || 500).send({
-                    message: typeof err === 'string' ? err : err.message
+                    message: typeof err === 'string' ? err : err.message || err.name
                 });
             }
         }
