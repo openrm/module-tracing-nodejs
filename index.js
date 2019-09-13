@@ -11,7 +11,8 @@ module.exports = {
         assert(Sentry.getCurrentHub().getStackTop().client, 'Sentry client is not initialized');
 
         setOptions(opts);
-        require('./intercept');
+        // deprecated
+        // require('./intercept');
         require('./tracer');
     },
 
