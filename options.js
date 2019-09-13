@@ -26,7 +26,7 @@ let OPTIONS = {
 
 const setOptions = (opts) => {
     Object.keys(OPTIONS).forEach(key => {
-        if (opts[key]) OPTIONS[key] = opts[key];
+        if (opts[key] !== undefined) OPTIONS[key] = opts[key];
     });
 };
 
