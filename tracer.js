@@ -1,7 +1,7 @@
 const { options } = require('./options');
 
 require('@google-cloud/trace-agent').start({
-    enabled: process.env.NODE_ENV === 'production',
+    enabled: options.enableTrace,
     propagation: require('./propagation'),
     ignoreUrls: ['/healthz', '/_ah/health'],
     samplingRate: options.samplingRate

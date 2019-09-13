@@ -20,6 +20,7 @@ let OPTIONS = {
     beforeOutput: MASK_CREDENTIALS,
     httpContext,
     timeout: 5000,
+    enableTrace: true,
     samplingRate: 100
 };
 
