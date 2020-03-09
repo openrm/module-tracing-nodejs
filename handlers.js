@@ -1,5 +1,5 @@
 const Sentry = require('@sentry/node');
-const { Span } = Sentry;
+const { Span } = require('@sentry/core');
 const { StatusCodeError } = require('request-promise-core/errors');
 const traceAgent = require('@google-cloud/trace-agent');
 
