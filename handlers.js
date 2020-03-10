@@ -1,5 +1,5 @@
 const Sentry = require('@sentry/node');
-const { Span } = require('@sentry/core');
+const { Span } = require('@sentry/types');
 const { StatusCodeError } = require('request-promise-core/errors');
 const traceAgent = require('@google-cloud/trace-agent');
 
@@ -31,7 +31,9 @@ module.exports = {
             const span = tracer.getCurrentRootSpan().getTraceContext();
 
             if (span) {
-                scope.setSpan(new Span(span.traceId, span.spanId, span.options === 1));
+                try {
+                    scope.setSpan(new Span(span.traceId, span.spanId, span.options === 1));
+                } catch {}
             }
 
             const eventId = Sentry.captureException(err, null, scope);
