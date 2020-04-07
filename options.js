@@ -21,6 +21,7 @@ let OPTIONS = {
     httpContext,
     timeout: 5000,
     enableTrace: true,
+    enableStackdriver: true,
     samplingRate: 100
 };
 

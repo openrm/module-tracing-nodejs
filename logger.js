@@ -9,20 +9,17 @@ const propagation = require('./propagation');
 
 const logging = new LoggingBunyan();
 
-const DEFAULT_OPTIONS = {
+const defaultOptions = () => ({
     name: 'default',
     streams: [
-        {
-            level: 'info',
-            stream: process.stdout
-        },
-        logging.stream('info')
+        options.enableStackdriver ?
+        logging.stream('info') : { level: 'info', stream: process.stdout }
     ],
     serializers: {
         errTimeout: bunyan.stdSerializers.err,
         err: bunyan.stdSerializers.err
     }
-};
+});
 
 let defaultLogger, formatter;
 
@@ -196,7 +193,7 @@ module.exports = {
     getLogger: getContextLogger,
 
     createLogger: (options) => {
-        defaultLogger = bunyan.createLogger(Object.assign(DEFAULT_OPTIONS, options));
+        defaultLogger = bunyan.createLogger(Object.assign(defaultOptions(), options));
         return wrapLogger(defaultLogger);
     },
 
