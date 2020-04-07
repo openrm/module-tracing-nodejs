@@ -141,6 +141,24 @@ const baseLoggingHandler = (err, req, res, next) => {
             err
         });
 
+        Object.assign(log, {
+            httpRequest: {
+                remoteIp: log.ip,
+                status: log.status,
+                requestUrl: log.url,
+                requestMethod: log.method,
+                requestSize: req.header('Content-Length'),
+                responseSize: log.responseContentLength,
+                referer: log.referer,
+                protocol: log.protocol,
+                userAgent: log.userAgent,
+                latency: {
+                    seconds: s,
+                    nanos: ns
+                }
+            }
+        });
+
         const utils = { mask };
 
         try {
