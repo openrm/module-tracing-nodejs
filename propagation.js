@@ -1,6 +1,13 @@
 const { options } = require('./options');
 const { generate } = require('@opencensus/propagation-stackdriver').v1;
-const { TRACEPARENT_REGEXP } = require('@sentry/hub');
+
+const TRACEPARENT_REGEXP = new RegExp(
+  '^[ \\t]*' + // whitespace
+  '([0-9a-f]{32})?' + // trace_id
+  '-?([0-9a-f]{16})?' + // span_id
+  '-?([01])?' + // sampled
+    '[ \\t]*$', // whitespace
+);
 
 const parse = (trace) => {
     const matches = trace.match(TRACEPARENT_REGEXP);
