@@ -11,14 +11,15 @@ const TRACEPARENT_REGEXP = new RegExp(
 
 const parse = (trace) => {
     const matches = trace.match(TRACEPARENT_REGEXP);
-    if (matches) {
-        let sampled;
-        if (matches[3] === '1') {
-            sampled = true;
-        } else if (matches[3] === '0') {
-            sampled = false;
-        }
+    if (!matches) return {};
+
+    let sampled;
+    if (matches[3] === '1') {
+        sampled = true;
+    } else if (matches[3] === '0') {
+        sampled = false;
     }
+
     return {
         traceId: matches[1] || '',
         spanId: matches[2] || '',

@@ -1,17 +1,21 @@
-const { SPAN_KEY, options } = require('./options');
+const traceAgent = require('@google-cloud/trace-agent');
+const { options } = require('./options');
+const { inject } = require('./propagation');
 
 const interceptor = (request) => (opts) => {
-    const span = options.httpContext.get(SPAN_KEY);
+    const tracer = traceAgent.get();
+    const span = tracer.getCurrentRootSpan().getTraceContext();
 
-    if (!span) return request(opts);
+    if (span) {
+        const setter = {
+            setHeader: (key, value) => {
+                opts.headers = { ...opts.headers, [key]: value };
+            }
+        };
+        inject(setter, span);
+    }
 
-    return request({
-        ...opts,
-        headers: {
-            ...opts.headers,
-            [options.traceHeader]: span.toTraceparent()
-        }
-    });
+    return request(opts);
 };
 
 /*
