@@ -2,7 +2,7 @@ const bunyan = require('bunyan');
 const morgan = require('morgan');
 const util = require('util');
 const traceAgent = require('@google-cloud/trace-agent');
-const { LoggingBunyan } = require('@google-cloud/logging-bunyan');
+const { LoggingBunyan, LOGGING_TRACE_KEY } = require('@google-cloud/logging-bunyan');
 
 const { LOGGER_KEY, options, mask } = require('./options');
 const propagation = require('./propagation');
@@ -60,6 +60,21 @@ const stringifySpan = (span) => ({
     traceId: span._traceId
 });
 
+const formatTrace = (agent) => {
+    if (!agent || !agent.getCurrentContextId || !agent.getWriterProjectId) {
+        return null;
+    }
+    const traceId = agent.getCurrentContextId();
+    if (!traceId) {
+        return null;
+    }
+    const traceProjectId = agent.getWriterProjectId();
+    if (!traceProjectId) {
+        return null;
+    }
+    return `projects/${traceProjectId}/traces/${traceId}`;
+};
+
 const baseLoggingHandler = (err, req, res, next) => {
 
     if (err) {
@@ -75,7 +90,8 @@ const baseLoggingHandler = (err, req, res, next) => {
         span: {
             ...tracer.getCurrentRootSpan().getTraceContext(),
             parent: propagation.extract({ getHeader: req.header.bind(req) })
-        }
+        },
+        [LOGGING_TRACE_KEY]: formatTrace(tracer)
     });
 
     options.httpContext.set(LOGGER_KEY, localLogger);
