@@ -2,9 +2,12 @@ const bunyan = require('bunyan');
 const morgan = require('morgan');
 const util = require('util');
 const traceAgent = require('@google-cloud/trace-agent');
+const { LoggingBunyan } = require('@google-cloud/logging-bunyan');
 
 const { LOGGER_KEY, options, mask } = require('./options');
 const propagation = require('./propagation');
+
+const logging = new LoggingBunyan();
 
 const DEFAULT_OPTIONS = {
     name: 'default',
@@ -12,7 +15,8 @@ const DEFAULT_OPTIONS = {
         {
             level: 'info',
             stream: process.stdout
-        }
+        },
+        logging.stream('info')
     ],
     serializers: {
         errTimeout: bunyan.stdSerializers.err,

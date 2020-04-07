@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/openrm/module-tracing-nodejs#readme",
   "dependencies": {
+    "@google-cloud/logging-bunyan": "^2.0.3",
     "@google-cloud/trace-agent": "^4.2.0",
     "@opencensus/propagation-stackdriver": "0.0.17",
     "@sentry/node": "^5.13.2",
