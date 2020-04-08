@@ -1,10 +1,23 @@
+const crypto = require('crypto');
 const traceAgent = require('@google-cloud/trace-agent');
-const { options } = require('./options');
+const { SPAN_KEY, options } = require('./options');
 const { inject } = require('./propagation');
+
+const randomSpanId = () => parseInt(crypto.randomBytes(6).toString('hex'), 16).toString();
+
+const newSpan = (spanContext) => {
+    if (!spanContext) return null;
+    return {
+        traceId: spanContext.traceId,
+        spanId: randomSpanId(),
+        options: spanContext.options
+    };
+};
 
 const interceptor = (request) => (opts) => {
     const tracer = traceAgent.get();
-    const span = tracer.getCurrentRootSpan().getTraceContext();
+    const span = tracer.getCurrentRootSpan().getTraceContext()
+        || newSpan(options.httpContext.get(SPAN_KEY)); // fallback for occasionally lost contexts
 
     if (span) {
         const setter = {
