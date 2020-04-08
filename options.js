@@ -17,6 +17,7 @@ let OPTIONS = {
         maxLengthArray: Infinity,
         maxLengthString: 1000
     },
+    service: {},
     beforeOutput: MASK_CREDENTIALS,
     httpContext,
     timeout: 5000,

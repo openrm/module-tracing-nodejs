@@ -10,7 +10,8 @@ const propagation = require('./propagation');
 const logging = new LoggingBunyan();
 
 const defaultOptions = () => ({
-    name: 'default',
+    name: options.service.name || 'default',
+    version: options.service.version,
     streams: [
         options.enableStackdriver ?
         logging.stream('info') : { level: 'info', stream: process.stdout }
