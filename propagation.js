@@ -27,13 +27,8 @@ const parse = (trace) => {
     };
 };
 
-const serialize = (spanContext) => {
-    let header = `${spanContext.traceId}-${spanContext.spanId}`;
-    if (spanContext.options) {
-        header += `-${spanContext.options}`;
-    }
-    return header;
-};
+const serialize = (spanContext) =>
+    `${spanContext.traceId}-${spanContext.spanId}-${spanContext.options || 0}`;
 
 
 module.exports = {
