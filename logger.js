@@ -111,6 +111,11 @@ const baseLoggingHandler = (err, req, res, next) => {
         userAgent: req.header('User-Agent'),
         body: inspect(req.body && JSON.parse(JSON.stringify(req.body)), options.bodyInspectOptions),
         headers: req.headers,
+        labels: {
+            pod_name: process.env.HOSTNAME,
+            service_name: options.service.name,
+            service_version: options.service.version
+        }
     };
 
     let logged = false, timedout;
