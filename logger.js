@@ -89,6 +89,11 @@ const baseLoggingHandler = (err, req, res, next) => {
     options.httpContext.set(SPAN_KEY, rootSpan);
 
     localLogger = logger.child({
+        labels: {
+            pod_name: process.env.HOSTNAME,
+            service_name: options.service.name,
+            service_version: options.service.version
+        },
         span: {
             ...tracer.getCurrentRootSpan().getTraceContext(),
             parent: rootSpan
@@ -110,12 +115,7 @@ const baseLoggingHandler = (err, req, res, next) => {
         referer: req.header('Referrer') || req.header('Referer'),
         userAgent: req.header('User-Agent'),
         body: inspect(req.body && JSON.parse(JSON.stringify(req.body)), options.bodyInspectOptions),
-        headers: req.headers,
-        labels: {
-            pod_name: process.env.HOSTNAME,
-            service_name: options.service.name,
-            service_version: options.service.version
-        }
+        headers: req.headers
     };
 
     let logged = false, timedout;
