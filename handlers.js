@@ -26,34 +26,34 @@ module.exports = {
     },
 
     errorHandler: (opts = {}) => (err, req, res, next) => {
-        Sentry.withScope(scope => {
-            const tracer = traceAgent.get();
-            const span = tracer.getCurrentRootSpan().getTraceContext();
+        const _code = parseInt(err.statusCode)
+            || parseInt(err.status)
+            || parseInt(err.code)
+            || 500;
+        const code = 100 <= _code && _code < 600 ? _code : 500;
 
-            if (span) {
-                try {
-                    scope.setSpan(new Span(span.traceId, span.spanId, span.options === 1));
-                } catch {}
-            }
+        if (code >= 500) {
+            Sentry.withScope(scope => {
+                const tracer = traceAgent.get();
+                const span = tracer.getCurrentRootSpan().getTraceContext();
 
-            const eventId = Sentry.captureException(err, null, scope);
-            res.sentry = { eventId };
-        });
+                if (span) {
+                    try {
+                        scope.setSpan(new Span(span.traceId, span.spanId, span.options === 1));
+                    } catch {}
+                }
+
+                const eventId = Sentry.captureException(err, null, scope);
+                res.sentry = { eventId };
+            });
+        }
 
         if (opts.respondWithError) {
             if (err instanceof StatusCodeError) {
-                const {
-                    error,
-                    statusCode
-                } = err;
-
-                res.status(statusCode < 500 ? statusCode : 500).send(error);
+                // deeper error
+                const { error } = err;
+                res.status(code < 500 ? code : 500).send(error);
             } else {
-                const code = parseInt(err.statusCode)
-                    || parseInt(err.status)
-                    || parseInt(err.code)
-                    || 500;
-
                 res.status(code).send({
                     message: typeof err === 'string' ? err : err.message || err.name
                 });
