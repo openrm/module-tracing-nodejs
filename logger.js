@@ -7,6 +7,8 @@ const { LoggingBunyan, LOGGING_TRACE_KEY } = require('@google-cloud/logging-buny
 const { LOGGER_KEY, SPAN_KEY, options, mask } = require('./options');
 const propagation = require('./propagation');
 
+const LEVELS = Object.keys(bunyan.levelFromName);
+
 const logging = new LoggingBunyan();
 
 const defaultOptions = () => ({
@@ -210,6 +212,7 @@ const wrapLogger = (logger) => {
         Object.assign(arguments[0], contextLogger ? contextLogger.fields : {});
         return _emit.apply(this, arguments);
     };
+    for (const level of LEVELS) logger[level] = logger[level].bind(logger);
     return logger;
 };
 
